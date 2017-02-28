@@ -57,6 +57,7 @@ namespace ConsoleApplication
                             var body = ea.Body;
                             var message = Encoding.UTF8.GetString(body);
                             Console.WriteLine(" [x] Received {0} from {1}/{2}", message, ea.Exchange, ea.RoutingKey);
+                            Console.WriteLine(" [x] Tenant {0} Supplier {1}", Encoding.UTF8.GetString((byte[])ea.BasicProperties.Headers["tenant"]), Encoding.UTF8.GetString((byte[])ea.BasicProperties.Headers["supplier"]));
                         };
 
                         channel.BasicConsume(queue: queueName,

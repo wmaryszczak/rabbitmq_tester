@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Net.Security;
 using System.Security.Authentication;
 using System.Security.Cryptography.X509Certificates;
@@ -45,14 +46,19 @@ namespace ConsoleApplication
                 {
                     using (var channel = connection.CreateModel())
                     {
-                                    string message = "Hello World!";
-                                    var body = Encoding.UTF8.GetBytes(message);
+                        string message = "Hello World!";
+                        var body = Encoding.UTF8.GetBytes(message);
 
-                                    channel.BasicPublish(exchange: "amq.fanout",
-                                                        routingKey: "exports.stations",
-                                                        basicProperties: null,
-                                                        body: body);
-                                    Console.WriteLine(" [x] Sent {0}", message);
+                        var properties = channel.CreateBasicProperties();
+                        properties.Headers = new Dictionary<string, object>();
+                        properties.Headers.Add("tenant", "test");
+                        properties.Headers.Add("supplier", "BB");
+
+                        channel.BasicPublish(exchange: "amq.fanout",
+                                            routingKey: "exports.stations",
+                                            basicProperties: properties,
+                                            body: body);
+                        Console.WriteLine(" [x] Sent {0}", message);
 
                     }
                 }
