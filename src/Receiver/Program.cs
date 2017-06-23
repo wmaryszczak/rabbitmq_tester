@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using Autofac;
@@ -35,10 +35,13 @@ namespace ConsoleApplication
             factory.uri = new Uri(connectionString);
             factory.Ssl.ServerName = System.Net.Dns.GetHostName();
             factory.Ssl.Enabled = true;
-            factory.Ssl.AcceptablePolicyErrors = SslPolicyErrors.RemoteCertificateChainErrors;
-            //factory.Ssl.CertificateValidationCallback = RemoteCertificateValidationCallback;
+            factory.Ssl.AcceptablePolicyErrors = SslPolicyErrors.RemoteCertificateChainErrors | SslPolicyErrors.RemoteCertificateNameMismatch;
             factory.Ssl.Version = SslProtocols.Tls | SslProtocols.Tls11 | SslProtocols.Tls12;
-            factory.Ssl.Certs = new X509Certificate2Collection(new X509Certificate2(certPath));
+            var cert = LoadCert(certPath);
+            if(cert != null)
+            {
+              factory.Ssl.Certs = new X509CertificateCollection(new [] { cert });
+            }
             try
             {            
                 using (var connection = factory.CreateConnection())
@@ -80,6 +83,14 @@ namespace ConsoleApplication
                 }
             }
                        
+        }
+        private static X509Certificate LoadCert(string certPath)
+        {
+          if(string.IsNullOrWhiteSpace(certPath) || !System.IO.File.Exists(certPath))
+          {
+            return null;
+          }
+          return new X509Certificate(certPath);
         }
     }
 }
